@@ -4,6 +4,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 
+
+// Enable CORS for all routes
+app.use(cors({
+  origin: ['http://localhost:5000', 'https://medremapp.onrender.com/'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 // Middleware
 app.use(cors());
 app.use(express.json());

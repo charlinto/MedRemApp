@@ -56,4 +56,15 @@ router.post('/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+router.get('/', (req, res) => {
+  res.json({
+    message: 'Medication Reminder API',
+    status: 'operational',
+    
+  });
+});
+
+
+
 module.exports = router;
