@@ -57,13 +57,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/', (req, res) => {
-  res.json({
-    message: 'Medication Reminder API',
-    status: 'operational',
-    
-  });
-});
+
 
 
 
