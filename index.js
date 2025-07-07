@@ -19,7 +19,10 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Middleware
 app.use(cors({
-  origin: "*",
+  origin: (origin, callback) => {
+    callback(null, origin || '*');
+  },
+  credentials: true,
 })); // Use the configured CORS options
 app.use(express.json());
 
