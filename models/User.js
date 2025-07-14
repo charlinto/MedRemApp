@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
+  Name: {
+    type: String,
+    required: true,         // make it required if every user must have a name
+    trim: true,
+    minlength: 2            // optional minimum length validation
+  },
   email: {
     type: String,
     required: true,
