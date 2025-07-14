@@ -12,7 +12,7 @@ router.post('/register', async (req, res) => {
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ msg: 'User already exists' });
 
-    user = new User({ email, password });  // Just assign raw password
+    user = new User({name, email, password });  // Just assign raw password
 
     await user.save();  // Pre-save hook hashes it
 
