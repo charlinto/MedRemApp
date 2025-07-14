@@ -18,12 +18,31 @@ mongoose.connect(process.env.MONGODB_URI)
 // };
 
 // Middleware
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     callback(null, origin || '*');
+//   },
+//   credentials: true,
+// })); // Use the configured CORS options
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://uhealth-reminder.vercel.app'
+];
+
 app.use(cors({
-  origin: (origin, callback) => {
-    callback(null, origin || '*');
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
   },
   credentials: true,
-})); // Use the configured CORS options
+}));
 app.use(express.json());
 
 // Routes
@@ -53,7 +72,7 @@ app.use('/api/reminders', reminderRoutes);
 
 // 404 Handler
 app.use((req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     success: false,
     message: 'Endpoint not found',
     availableEndpoints: [
