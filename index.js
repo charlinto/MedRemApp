@@ -70,6 +70,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/medications', medicationRoutes);
 app.use('/api/reminders', reminderRoutes);
 
+// Initialize the scheduler for medication reminders
+require('./services/scheduler');
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
