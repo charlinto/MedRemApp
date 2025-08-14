@@ -65,7 +65,7 @@ const task = cron.schedule('* * * * *', async () => {
   }
 }, {
   scheduled: true,
-  timezone: "America/New_York" // Set appropriate timezone
+  timezone: "Africa/Lagos" // West Africa Time (WAT)
 });
 
 // Handle graceful shutdown
