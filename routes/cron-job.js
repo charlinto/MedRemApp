@@ -1,6 +1,6 @@
 const express = require('express');
 const Reminder = require('../models/Reminder');
-const { sendMedicationReminder } = require('../utils/emailService');
+const { sendMedicationReminder } = require('../services/emailService');
 
 const router = express.Router();
 
