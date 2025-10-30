@@ -207,35 +207,41 @@ async function createRemindersForMedication(medication) {
       const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
       const dayName = dayNames[date.getDay()];
 
-      if (days.includes(dayName)) {
-        const reminderDate = new Date(medication.startDate);
-        reminderDate.setHours(hours, minutes, 0, 0);
+   if (days.includes(dayName)) {
+  // Start with the medication startDate
+  const reminderDate = new Date(medication.startDate);
 
-        // Skip if before current time
-        if (reminderDate < new Date()) continue;
+  // Set the scheduled time based on hours/minutes
+  reminderDate.setHours(hours, minutes, 0, 0);
 
-        // // Skip if after medication end date
-        // console.log(reminderDate, '===', new Date(medication.endDate), medication.endDate && reminderDate > new Date(medication.endDate))
-        // if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
+  // Adjust to UTC+1: convert to UTC then add one hour
+  const utcTime = reminderDate.getTime() - (reminderDate.getTimezoneOffset() * 60000); 
+  const offset1Hour = 1 * 60 * 60000; // +1 hour in ms
+  const reminderDateUtcPlus1 = new Date(utcTime + offset1Hour);
 
-        console.log({
-          user: medication.user,
-          medication: medication._id,
-          scheduledTime: reminderDate,
-          status: 'pending'
-        })
+  // Skip if this adjusted time is before now
+  if (reminderDateUtcPlus1 < new Date()) continue;
 
-        const reminder = new Reminder({
-          user: medication.user,
-          medication: medication._id,
-          scheduledTime: reminderDate,
-          status: 'pending'
-        });
+  console.log({
+    user: medication.user,
+    medication: medication._id,
+    scheduledTime: reminderDateUtcPlus1,
+    status: 'pending'
+  });
 
-        await reminder.save();
-      }
+  const reminder = new Reminder({
+    user: medication.user,
+    medication: medication._id,
+    scheduledTime: reminderDateUtcPlus1,
+    status: 'pending'
+  });
 
-    }
+  await reminder.save();
+}
+
+
+  }
+
   } catch (err) {
     console.error('Error creating reminders:', err.message);
     throw err;
