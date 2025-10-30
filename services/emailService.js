@@ -9,6 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendMedicationReminder = async (email, medicationName, dosage, time) => {
+  console.log({email, medicationName, dosage, time})
   // Validate required environment variables
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
     throw new Error('Email credentials not configured. Please set EMAIL_USER and EMAIL_PASSWORD environment variables.');

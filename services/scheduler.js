@@ -3,17 +3,19 @@ const Reminder = require('../models/Reminder');
 const { sendMedicationReminder } = require('./emailService');
 const { sendPushNotification } = require('./pushNotificationService');
 
-console.log('Medication reminder scheduler initialized');
 
 // Check every minute for due reminders
 const task = cron.schedule('* * * * *', async () => {
+  const now = new Date();
+  console.log('Medication reminder scheduler initialized....', new Date(now.getTime() + 5 * 60000));
   try {
-    const now = new Date();
     const upcomingReminders = await Reminder.find({
       scheduledTime: { $lte: new Date(now.getTime() + 5 * 60000) }, // 5 minutes buffer
       status: 'pending',
       notificationSent: false
     }).populate('user').populate('medication');
+
+    console.log("upcomingReminders", upcomingReminders);
 
     if (upcomingReminders.length > 0) {
       console.log(`Processing ${upcomingReminders.length} reminder(s) at ${now.toISOString()}`);
@@ -43,6 +45,7 @@ const task = cron.schedule('* * * * *', async () => {
         // Send push notification if device token exists
         if (reminder.user.deviceToken) {
           await sendPushNotification(
+            reminder.user.email,
             reminder.user.deviceToken,
             reminder.medication.name,
             reminder.medication.dosage,
