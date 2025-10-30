@@ -215,9 +215,9 @@ async function createRemindersForMedication(medication) {
         // Skip if before current time
         if (reminderDate < new Date()) continue;
 
-        // Skip if after medication end date
-        console.log(reminderDate, '===', new Date(medication.endDate), medication.endDate && reminderDate > new Date(medication.endDate))
-        if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
+        // // Skip if after medication end date
+        // console.log(reminderDate, '===', new Date(medication.endDate), medication.endDate && reminderDate > new Date(medication.endDate))
+        // if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
 
         console.log({
           user: medication.user,
