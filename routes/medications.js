@@ -208,37 +208,32 @@ async function createRemindersForMedication(medication) {
       const dayName = dayNames[date.getDay()];
 
       if (days.includes(dayName)) {
-        // Start with the medication startDate
         const reminderDate = new Date(medication.startDate);
-
-        // Set the scheduled time based on hours/minutes
         reminderDate.setHours(hours, minutes, 0, 0);
 
-        // Adjust to UTC+1: convert to UTC then add one hour
-        const utcTime = reminderDate.getTime() - (reminderDate.getTimezoneOffset() * 60000);
-        const offset1Hour = 1 * 60 * 60000; // +1 hour in ms
-        const reminderDateUtcPlus1 = new Date(utcTime + offset1Hour);
+        // Skip if before current time
+        if (reminderDate < new Date()) continue;
 
-        // Skip if this adjusted time is before now
-        if (reminderDateUtcPlus1 < new Date()) continue;
+        // // Skip if after medication end date
+        // console.log(reminderDate, '===', new Date(medication.endDate), medication.endDate && reminderDate > new Date(medication.endDate))
+        // if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
 
         console.log({
           user: medication.user,
           medication: medication._id,
-          scheduledTime: reminderDateUtcPlus1,
+          scheduledTime: reminderDate,
           status: 'pending'
-        });
+        })
 
         const reminder = new Reminder({
           user: medication.user,
           medication: medication._id,
-          scheduledTime: reminderDateUtcPlus1,
+          scheduledTime: reminderDate,
           status: 'pending'
         });
 
         await reminder.save();
       }
-
 
     }
   } catch (err) {
