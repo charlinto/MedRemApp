@@ -28,7 +28,7 @@ router.post(
 
     try {
       const { name, dosage, schedule, notes, startDate, endDate } = req.body;
-      
+
       const medication = new Medication({
         user: req.user.id,
         name,
@@ -39,11 +39,12 @@ router.post(
         endDate: endDate || Date.now()
       });
 
+
       await medication.save();
-      
+
       // Create reminders based on schedule
       await createRemindersForMedication(medication);
-      
+
       res.json(medication);
     } catch (err) {
       console.error(err.message);
@@ -59,7 +60,7 @@ router.get('/', auth, async (req, res) => {
   try {
     const medications = await Medication.find({ user: req.user.id })
       .sort({ startDate: -1 });
-      
+
     res.json(medications);
   } catch (err) {
     console.error(err.message);
@@ -134,7 +135,7 @@ router.put(
       // Optional: Update existing reminders or create new ones
       // This could be more sophisticated based on your needs
       if (schedule) {
-        await Reminder.deleteMany({ 
+        await Reminder.deleteMany({
           medication: medication._id,
           status: 'pending'
         });
@@ -186,8 +187,10 @@ router.delete('/:id', auth, async (req, res) => {
 // Helper function to create reminders
 async function createRemindersForMedication(medication) {
   try {
+
+    console.log('Creating reminders for medication:', medication._id);
     // Delete any existing pending reminders for this medication
-    await Reminder.deleteMany({ 
+    await Reminder.deleteMany({
       medication: medication._id,
       status: 'pending'
     });
@@ -196,36 +199,43 @@ async function createRemindersForMedication(medication) {
     for (const scheduleItem of medication.schedule) {
       const days = scheduleItem.days.map(day => day.toLowerCase());
       const [hours, minutes] = scheduleItem.time.split(':').map(Number);
-      
+
       // Create reminders for the next 30 days (adjust as needed)
-      for (let i = 0; i < 30; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        
-        // Check if this day of week is in the schedule
-        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        const dayName = dayNames[date.getDay()];
-        
-        if (days.includes(dayName)) {
-          const reminderDate = new Date(date);
-          reminderDate.setHours(hours, minutes, 0, 0);
-          
-          // Skip if before current time
-          if (reminderDate < new Date()) continue;
-          
-          // Skip if after medication end date
-          if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
-          
-          const reminder = new Reminder({
-            user: medication.user,
-            medication: medication._id,
-            scheduledTime: reminderDate,
-            status: 'pending'
-          });
-          
-          await reminder.save();
-        }
+      const date = new Date();
+      // date.setDate(date.getDate() + i);
+
+      // Check if this day of week is in the schedule
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayName = dayNames[date.getDay()];
+
+      if (days.includes(dayName)) {
+        const reminderDate = new Date(medication.startDate);
+        reminderDate.setHours(hours, minutes, 0, 0);
+
+        // Skip if before current time
+        if (reminderDate < new Date()) continue;
+
+        // Skip if after medication end date
+        console.log(reminderDate, '===', new Date(medication.endDate), medication.endDate && reminderDate > new Date(medication.endDate))
+        if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
+
+        console.log({
+          user: medication.user,
+          medication: medication._id,
+          scheduledTime: reminderDate,
+          status: 'pending'
+        })
+
+        const reminder = new Reminder({
+          user: medication.user,
+          medication: medication._id,
+          scheduledTime: reminderDate,
+          status: 'pending'
+        });
+
+        await reminder.save();
       }
+
     }
   } catch (err) {
     console.error('Error creating reminders:', err.message);
