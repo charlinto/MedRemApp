@@ -188,7 +188,6 @@ router.delete('/:id', auth, async (req, res) => {
 async function createRemindersForMedication(medication) {
   try {
 
-    console.log('Creating reminders for medication:', medication._id);
     // Delete any existing pending reminders for this medication
     await Reminder.deleteMany({
       medication: medication._id,
@@ -209,32 +208,37 @@ async function createRemindersForMedication(medication) {
       const dayName = dayNames[date.getDay()];
 
       if (days.includes(dayName)) {
+        // Start with the medication startDate
         const reminderDate = new Date(medication.startDate);
+
+        // Set the scheduled time based on hours/minutes
         reminderDate.setHours(hours, minutes, 0, 0);
 
-        // Skip if before current time
-        if (reminderDate < new Date()) continue;
+        // Adjust to UTC+1: convert to UTC then add one hour
+        const utcTime = reminderDate.getTime() - (reminderDate.getTimezoneOffset() * 60000);
+        const offset1Hour = 1 * 60 * 60000; // +1 hour in ms
+        const reminderDateUtcPlus1 = new Date(utcTime + offset1Hour);
 
-        // // Skip if after medication end date
-        // console.log(reminderDate, '===', new Date(medication.endDate), medication.endDate && reminderDate > new Date(medication.endDate))
-        // if (medication.endDate && reminderDate > new Date(medication.endDate)) continue;
+        // Skip if this adjusted time is before now
+        if (reminderDateUtcPlus1 < new Date()) continue;
 
         console.log({
           user: medication.user,
           medication: medication._id,
-          scheduledTime: reminderDate,
+          scheduledTime: reminderDateUtcPlus1,
           status: 'pending'
-        })
+        });
 
         const reminder = new Reminder({
           user: medication.user,
           medication: medication._id,
-          scheduledTime: reminderDate,
+          scheduledTime: reminderDateUtcPlus1,
           status: 'pending'
         });
 
         await reminder.save();
       }
+
 
     }
   } catch (err) {
